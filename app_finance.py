@@ -1,27 +1,20 @@
-from __future__ import annotations
+import streamlit as st
 
-import os
-import subprocess
-import sys
+# Allgemeine Seiteneinstellungen
+st.set_page_config(
+    page_title="Immobilien Tools",
+    page_icon="🏡",
+    layout="wide"
+)
 
-
-def main():
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    app_path = os.path.join(base_dir, "core_finance", "main.py")
-
-    cmd = [
-        sys.executable,
-        "-m",
-        "streamlit",
-        "run",
-        app_path,
-        "--server.headless=true",
-        "--browser.serverAddress=localhost",
-        "--browser.gatherUsageStats=false",
-    ]
-
-    subprocess.Popen(cmd)
-
-
-if __name__ == "__main__":
-    main()
+st.title("Willkommen beim Immobilien Rechner")
+st.markdown("""
+Wähle eine Seite in der Seitenleiste, um eine spezifische Berechnung anzuzeigen:
+- 💰 Ausgabenreduktion
+- 💰 Steuern - EST
+- 🏠 Immobilien - Objektdaten
+- 📉 Immobilien - Tilgungsplan
+- 💰 Immobilien - Kaufnebenkosten
+- 💰 Immobilien - Cashflow
+- 🏢 Immobilien - Rendite & Wertentwicklung
+""")
