@@ -28,8 +28,8 @@ if str(_DEMO_DIR) not in sys.path:
 
 import streamlit as st
 
-from exercises_dict import muscle_exercises  # local copy
-from schedule_logic import (  # local module
+from core_fitness.exercises_dict import muscle_exercises  # local copy
+from core_fitness.schedule_logic import (  # local module
     DAY_TO_THEME,
     WEEK_DAYS,
     WEEKLY_PROGRESSION_RATE,
@@ -37,7 +37,7 @@ from schedule_logic import (  # local module
     build_weekly_plan,
     format_theme_label,
 )
-from weight_store import load_weights, save_weights  # local module
+from core_fitness.weight_store import load_weights, save_weights  # local module
 
 # ---------------------------------------------------------------------------
 # Page config
