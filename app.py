@@ -6,9 +6,11 @@ Run from the project root:
 
     streamlit run backend/demo/app.py
 
-Three tabs:
+Five tabs:
   📅  Wochenplan        – weekly exercise schedule with progression preview
-  ⚖️  Gewichte          – per-exercise weight editor (sliders + number inputs)
+  💪  Beugung           – flexion exercises grouped by body part + weight sliders
+  📐  Streckung         – extension exercises grouped by body part + weight sliders
+  🔄  Rotation & mehr   – rotation/secondary exercises grouped by body part + weight sliders
   📊  Progression       – bar chart and summary table
 """
 from __future__ import annotations
@@ -34,7 +36,6 @@ from schedule_logic import (  # local module
     WeightRow,
     build_weekly_plan,
     format_theme_label,
-    generate_progression_chart,
 )
 from weight_store import load_weights, save_weights  # local module
 
@@ -64,10 +65,85 @@ st.markdown(
 .wchip { background:#e8f0fe; color:#1a237e; padding:1px 7px; border-radius:10px; font-size:.82em; font-weight:600; }
 /* Section headers in weight editor */
 .wtype-header { font-size:.88em; font-weight:700; color:#555; margin-bottom:2px; }
+/* Body-part section header */
+.bodypart-header { font-size:1.05em; font-weight:700; color:#1976D2; border-bottom: 2px solid #1976D2; padding-bottom:3px; margin-top:12px; margin-bottom:6px; }
 </style>
 """,
     unsafe_allow_html=True,
 )
+
+# ---------------------------------------------------------------------------
+# Body-part → muscles mapping (anatomical order: head → feet)
+# ---------------------------------------------------------------------------
+BODY_PARTS: list[tuple[str, list[str]]] = [
+    ("🧠 Nacken", [
+        "Sternocleidomastoideus | Splenius Capitis",
+    ]),
+    ("🫁 Brust", [
+        "Pectoralis Clavicularis | Sternalis",
+    ]),
+    ("🦾 Schulter", [
+        "Rotatorenmanschette innen",
+        "Rotatorenmanschette aussen",
+        "Deltamuskel Vordere Faser",
+        "Deltamuskel Mittlere Faser",
+        "Deltamuskel Hintere Faser",
+        "Trapezius Elevation",
+        "Trapezius Retraktion",
+        "Trapezius Depression",
+    ]),
+    ("🔙 Rücken", [
+        "Latissimus Dorsi",
+        "Serratus Anterior",
+    ]),
+    ("💪 Oberarme", [
+        "Biceps Brachii",
+        "Triceps Longum | Lateraler Kopf | Medialer Kopf",
+    ]),
+    ("🖐 Unterarme", [
+        "Finger Flexion",
+        "Finger Extension",
+        "Handgelenk Flexion",
+        "Handgelenk Strecker",
+        "Unterarm Supinatoren | Pronatoren",
+    ]),
+    ("🔥 Core", [
+        "Rectus Abdominis",
+        "Transversus Abdominis",
+        "Obliquus",
+        "Erector Spinae",
+    ]),
+    ("🍑 Hüfte", [
+        "Iliopsoas",
+        "Gluteus Maximus",
+        "Gluteus Medius | Minimus",
+        "Gluteus medius (anteriore Fasern)",
+        "Adductor Longus | Magnus | Gracilis",
+        "Hüft-Außenrotatoren",
+    ]),
+    ("🦵 Oberschenkel", [
+        "Hamstrings",
+        "Quadrizeps",
+    ]),
+    ("🦿 Unterschenkel", [
+        "Gastrocnemius | Soleus",
+        "Tibialis Anterior",
+        "Tibialis Posterior",
+    ]),
+    ("🦶 Fuß", [
+        "Flexor Digitorum Brevis",
+        "Extensor Digitorum Brevis",
+    ]),
+]
+
+# Movement sets per theme day
+FLEXION_MOVEMENTS: set[str] = {"Beugung"}
+EXTENSION_MOVEMENTS: set[str] = {"Streckung"}
+ROTATION_MOVEMENTS: set[str] = {
+    "Rotation", "Lateralflexion", "Adduktion", "Abduktion",
+    "Supination", "Pronation", "Elevation", "Depression",
+    "Protraktion", "Anti-Extension", "Anti-Rotation", "Inversion",
+}
 
 # ---------------------------------------------------------------------------
 # Session state – load weights once per session
@@ -104,6 +180,124 @@ def _make_save_cb(muscle: str, movement: str, wtype: str, widget_key: str):
 
 
 # ---------------------------------------------------------------------------
+# Helper – render 3-column weight slider block for one exercise movement
+# ---------------------------------------------------------------------------
+def _fmt_exercise(val) -> str:
+    """Return display string for an exercise name, handling None/empty."""
+    if val in (None, "None", "none", "-", ""):
+        return "—"
+    return str(val)[:55]
+
+
+def _render_weight_sliders(muscle_name: str, movement: str, entry: dict) -> None:
+    """Renders the 3-column Maschine / HomeGym / Isometrisch slider block."""
+    machine_ex = _fmt_exercise(entry.get("Maschine"))
+    home_ex = _fmt_exercise(entry.get("HomeGym"))
+    iso_ex = _fmt_exercise(entry.get("Isometrisch"))
+
+    col_m, col_h, col_i = st.columns(3, gap="medium")
+
+    for col, icon, label, wtype, exercise_text in [
+        (col_m, "🏋️", "Maschine", "Maschine_kg", machine_ex),
+        (col_h, "🏠", "HomeGym", "HomeGym_kg", home_ex),
+        (col_i, "🧘", "Isometrisch", "Isometrisch_kg", iso_ex),
+    ]:
+        with col:
+            st.markdown(
+                f'<p class="wtype-header">{icon} {label}</p>', unsafe_allow_html=True
+            )
+            st.caption(exercise_text)
+            skey = _skey(muscle_name, movement, wtype)
+            sl_key = f"sl_{skey}"
+            ni_key = f"ni_{skey}"
+            cur = float(
+                st.session_state.weights.get(muscle_name, {})
+                .get(movement, {})
+                .get(wtype, 0.0)
+            )
+            if sl_key not in st.session_state:
+                st.session_state[sl_key] = cur
+            if ni_key not in st.session_state:
+                st.session_state[ni_key] = cur
+            st.slider(
+                f"{label} kg",
+                0.0, 200.0, step=0.5,
+                key=sl_key,
+                label_visibility="collapsed",
+                on_change=_make_save_cb(muscle_name, movement, wtype, sl_key),
+            )
+            st.number_input(
+                f"{label} kg (genau)",
+                min_value=0.0, max_value=500.0, step=0.5,
+                key=ni_key,
+                label_visibility="collapsed",
+                on_change=_make_save_cb(muscle_name, movement, wtype, ni_key),
+            )
+
+
+# ---------------------------------------------------------------------------
+# Helper – render a full theme tab (body parts → muscles → sliders)
+# ---------------------------------------------------------------------------
+def _render_theme_tab(theme_movements: set[str], tab_title: str, search_key: str) -> None:
+    """Render exercises for one theme, grouped by body part (head → feet)."""
+    st.subheader(tab_title)
+    st.caption(
+        "Passe die Gewichte für jede Übung an. "
+        "Änderungen werden **sofort gespeichert** (weights.json)."
+    )
+
+    search = st.text_input(
+        "🔍 Filtern (Muskel oder Übung)",
+        placeholder="z. B. Bizeps, Schulter …",
+        key=f"search_{search_key}",
+    )
+
+    any_shown = False
+    for body_part_label, muscles_in_part in BODY_PARTS:
+        # Collect muscles in this body part that have relevant movements
+        relevant: list[tuple[str, list[str]]] = []
+        for muscle_name in muscles_in_part:
+            if muscle_name not in muscle_exercises:
+                continue
+            movs = [mv for mv in muscle_exercises[muscle_name] if mv in theme_movements]
+            if not movs:
+                continue
+            # Apply search filter
+            if search:
+                s = search.lower()
+                match = s in muscle_name.lower() or any(
+                    s in mv.lower()
+                    or s in str(muscle_exercises[muscle_name][mv].get("Maschine", "")).lower()
+                    or s in str(muscle_exercises[muscle_name][mv].get("HomeGym", "")).lower()
+                    for mv in movs
+                )
+                if not match:
+                    continue
+            relevant.append((muscle_name, movs))
+
+        if not relevant:
+            continue
+
+        any_shown = True
+        st.markdown(
+            f'<div class="bodypart-header">{body_part_label}</div>',
+            unsafe_allow_html=True,
+        )
+
+        for muscle_name, movements in relevant:
+            with st.expander(f"🦾  {muscle_name}", expanded=False):
+                for i, movement in enumerate(movements):
+                    entry = muscle_exercises[muscle_name][movement]
+                    st.markdown(f"##### {movement}")
+                    _render_weight_sliders(muscle_name, movement, entry)
+                    if i < len(movements) - 1:
+                        st.divider()
+
+    if not any_shown:
+        st.info("Keine Übungen gefunden.")
+
+
+# ---------------------------------------------------------------------------
 # Build weekly plan (depends on current weights – rebuild on every rerun)
 # ---------------------------------------------------------------------------
 today: datetime.date = datetime.datetime.now(datetime.timezone.utc).date()
@@ -130,8 +324,14 @@ with col_date:
 # ---------------------------------------------------------------------------
 # TABS
 # ---------------------------------------------------------------------------
-tab_plan, tab_weights, tab_progression = st.tabs(
-    ["📅  Wochenplan", "⚖️  Gewichte verwalten", "📊  Progression"]
+tab_plan, tab_flexion, tab_extension, tab_rotation, tab_progression = st.tabs(
+    [
+        "📅  Wochenplan",
+        "💪  Beugung",
+        "📐  Streckung",
+        "🔄  Rotation & mehr",
+        "📊  Progression",
+    ]
 )
 
 
@@ -187,167 +387,28 @@ with tab_plan:
 
 
 # ===========================================================================
-# TAB 2 – GEWICHTE VERWALTEN
+# TAB 2 – BEUGUNG (FLEXION)
 # ===========================================================================
-with tab_weights:
-    st.subheader("⚖️  Trainingsgewichte bearbeiten")
-    st.caption(
-        "Passe die Gewichte für jede Übung an. "
-        "Änderungen werden **sofort gespeichert** (weights.json)."
-    )
-
-    # Search filter
-    search = st.text_input(
-        "🔍 Filtern (Muskel oder Übung)",
-        placeholder="z. B. Bizeps, Beugung, Kabel …",
-        key="weight_search",
-    )
-
-    for muscle_name, movements in muscle_exercises.items():
-        # Apply search filter
-        if search:
-            s = search.lower()
-            match = s in muscle_name.lower() or any(
-                s in mv.lower()
-                or s in str(entry.get("Maschine", "")).lower()
-                or s in str(entry.get("HomeGym", "")).lower()
-                for mv, entry in movements.items()
-            )
-            if not match:
-                continue
-
-        with st.expander(f"🦾  {muscle_name}", expanded=False):
-            for movement, entry in movements.items():
-                st.markdown(f"##### {movement}")
-
-                machine_ex = entry.get("Maschine") or "—"
-                home_ex = entry.get("HomeGym") or "—"
-                iso_ex = entry.get("Isometrisch") or "—"
-                if iso_ex in ("None", "none"):
-                    iso_ex = "—"
-
-                col_m, col_h, col_i = st.columns(3, gap="medium")
-
-                # --- Maschine ---
-                with col_m:
-                    st.markdown(
-                        '<p class="wtype-header">🏋️ Maschine</p>', unsafe_allow_html=True
-                    )
-                    st.caption(machine_ex[:50])
-                    skey = _skey(muscle_name, movement, "Maschine_kg")
-                    sl_key = f"sl_{skey}"
-                    ni_key = f"ni_{skey}"
-                    cur = float(
-                        st.session_state.weights.get(muscle_name, {})
-                        .get(movement, {})
-                        .get("Maschine_kg", 0.0)
-                    )
-                    if sl_key not in st.session_state:
-                        st.session_state[sl_key] = cur
-                    if ni_key not in st.session_state:
-                        st.session_state[ni_key] = cur
-                    st.slider(
-                        "Maschine kg",
-                        0.0,
-                        200.0,
-                        step=0.5,
-                        key=sl_key,
-                        label_visibility="collapsed",
-                        on_change=_make_save_cb(muscle_name, movement, "Maschine_kg", sl_key),
-                    )
-                    st.number_input(
-                        "Maschine kg (genau)",
-                        min_value=0.0,
-                        max_value=500.0,
-                        step=0.5,
-                        key=ni_key,
-                        label_visibility="collapsed",
-                        on_change=_make_save_cb(muscle_name, movement, "Maschine_kg", ni_key),
-                    )
-
-                # --- HomeGym ---
-                with col_h:
-                    st.markdown(
-                        '<p class="wtype-header">🏠 HomeGym</p>', unsafe_allow_html=True
-                    )
-                    st.caption(home_ex[:50])
-                    skey = _skey(muscle_name, movement, "HomeGym_kg")
-                    sl_key = f"sl_{skey}"
-                    ni_key = f"ni_{skey}"
-                    cur = float(
-                        st.session_state.weights.get(muscle_name, {})
-                        .get(movement, {})
-                        .get("HomeGym_kg", 0.0)
-                    )
-                    if sl_key not in st.session_state:
-                        st.session_state[sl_key] = cur
-                    if ni_key not in st.session_state:
-                        st.session_state[ni_key] = cur
-                    st.slider(
-                        "HomeGym kg",
-                        0.0,
-                        200.0,
-                        step=0.5,
-                        key=sl_key,
-                        label_visibility="collapsed",
-                        on_change=_make_save_cb(muscle_name, movement, "HomeGym_kg", sl_key),
-                    )
-                    st.number_input(
-                        "HomeGym kg (genau)",
-                        min_value=0.0,
-                        max_value=500.0,
-                        step=0.5,
-                        key=ni_key,
-                        label_visibility="collapsed",
-                        on_change=_make_save_cb(muscle_name, movement, "HomeGym_kg", ni_key),
-                    )
-
-                # --- Isometrisch ---
-                with col_i:
-                    st.markdown(
-                        '<p class="wtype-header">🧘 Isometrisch</p>', unsafe_allow_html=True
-                    )
-                    st.caption(iso_ex[:50])
-                    skey = _skey(muscle_name, movement, "Isometrisch_kg")
-                    sl_key = f"sl_{skey}"
-                    ni_key = f"ni_{skey}"
-                    cur = float(
-                        st.session_state.weights.get(muscle_name, {})
-                        .get(movement, {})
-                        .get("Isometrisch_kg", 0.0)
-                    )
-                    if sl_key not in st.session_state:
-                        st.session_state[sl_key] = cur
-                    if ni_key not in st.session_state:
-                        st.session_state[ni_key] = cur
-                    st.slider(
-                        "Isometrisch kg",
-                        0.0,
-                        200.0,
-                        step=0.5,
-                        key=sl_key,
-                        label_visibility="collapsed",
-                        on_change=_make_save_cb(
-                            muscle_name, movement, "Isometrisch_kg", sl_key
-                        ),
-                    )
-                    st.number_input(
-                        "Isometrisch kg (genau)",
-                        min_value=0.0,
-                        max_value=500.0,
-                        step=0.5,
-                        key=ni_key,
-                        label_visibility="collapsed",
-                        on_change=_make_save_cb(
-                            muscle_name, movement, "Isometrisch_kg", ni_key
-                        ),
-                    )
-
-                st.divider()
+with tab_flexion:
+    _render_theme_tab(FLEXION_MOVEMENTS, "💪  Beugung (Flexion)", "flexion")
 
 
 # ===========================================================================
-# TAB 3 – PROGRESSION
+# TAB 3 – STRECKUNG (EXTENSION)
+# ===========================================================================
+with tab_extension:
+    _render_theme_tab(EXTENSION_MOVEMENTS, "📐  Streckung (Extension)", "extension")
+
+
+# ===========================================================================
+# TAB 4 – ROTATION & MEHR
+# ===========================================================================
+with tab_rotation:
+    _render_theme_tab(ROTATION_MOVEMENTS, "🔄  Rotation & mehr", "rotation")
+
+
+# ===========================================================================
+# TAB 5 – PROGRESSION
 # ===========================================================================
 with tab_progression:
     st.subheader("📊  Trainingsgewicht-Progression")
@@ -383,12 +444,54 @@ with tab_progression:
             )
 
     # Chart
-    fig = generate_progression_chart(chart_rows, today)
-    if fig is not None:
-        st.pyplot(fig)
+    import plotly.graph_objects as go  # noqa: PLC0415
+
+    weighted = [(m, e, c, w, mo) for m, e, c, w, mo in chart_rows if c > 0]
+
+    if weighted:
+        labels   = [m[:40] for m, *_ in weighted]
+        now_vals = [c  for _, _, c, _, _  in weighted]
+        w1_vals  = [w  for _, _, _, w, _  in weighted]
+        m1_vals  = [mo for _, _, _, _, mo in weighted]
+
+        fig = go.Figure()
+        fig.add_trace(go.Bar(
+            y=labels, x=m1_vals,
+            name=f"+1 Monat  ({date_1m.strftime('%d.%m.%Y')})",
+            orientation="h",
+            marker=dict(color="#F57C00", opacity=0.75),
+            hovertemplate="%{y}<br>+1 Monat: <b>%{x:.1f} kg</b><extra></extra>",
+        ))
+        fig.add_trace(go.Bar(
+            y=labels, x=w1_vals,
+            name=f"+1 Woche  ({date_1w.strftime('%d.%m.%Y')})",
+            orientation="h",
+            marker=dict(color="#388E3C", opacity=0.85),
+            hovertemplate="%{y}<br>+1 Woche: <b>%{x:.1f} kg</b><extra></extra>",
+        ))
+        fig.add_trace(go.Bar(
+            y=labels, x=now_vals,
+            name=f"Heute  ({today.strftime('%d.%m.%Y')})",
+            orientation="h",
+            marker=dict(color="#1976D2"),
+            hovertemplate="%{y}<br>Heute: <b>%{x:.1f} kg</b><extra></extra>",
+        ))
+
+        fig.update_layout(
+            barmode="overlay",
+            height=max(420, len(labels) * 36),
+            xaxis=dict(title="Gewicht (kg)", gridcolor="#e0e0e0", zeroline=False),
+            yaxis=dict(autorange="reversed", tickfont=dict(size=11)),
+            legend=dict(orientation="h", yanchor="bottom", y=1.01, x=0),
+            margin=dict(l=10, r=20, t=10, b=40),
+            plot_bgcolor="rgba(0,0,0,0)",
+            paper_bgcolor="rgba(0,0,0,0)",
+            hoverlabel=dict(bgcolor="white", font_size=13),
+        )
+        st.plotly_chart(fig, use_container_width=True)
     else:
         st.warning(
-            "⚠️ Keine Gewichte gesetzt – bitte unter **⚖️ Gewichte verwalten** eintragen.",
+            "⚠️ Keine Gewichte gesetzt – bitte unter **💪 Beugung**, **📐 Streckung** oder **🔄 Rotation** eintragen.",
             icon="⚠️",
         )
 
