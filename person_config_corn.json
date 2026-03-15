@@ -1,0 +1,157 @@
+{
+  "person": "Corn",
+  "muscles": {
+    "Sternocleidomastoideus | Splenius Capitis": {
+      "enabled": false,
+      "movements": {}
+    },
+    "Pectoralis Clavicularis | Sternalis": {
+      "enabled": false,
+      "movements": {}
+    },
+    "Rotatorenmanschette innen": {
+      "enabled": false,
+      "movements": {}
+    },
+    "Rotatorenmanschette aussen": {
+      "enabled": true,
+      "movements": {
+        "Rotation": "HomeGym"
+      }
+    },
+    "Deltamuskel Vordere Faser": {
+      "enabled": false,
+      "movements": {}
+    },
+    "Deltamuskel Mittlere Faser": {
+      "enabled": false,
+      "movements": {}
+    },
+    "Deltamuskel Hintere Faser": {
+      "enabled": true,
+      "movements": {
+        "Streckung": "Maschine"
+      }
+    },
+    "Trapezius Elevation": {
+      "enabled": false,
+      "movements": {}
+    },
+    "Trapezius Retraktion": {
+      "enabled": true,
+      "movements": {
+        "Streckung": "HomeGym"
+      }
+    },
+    "Trapezius Depression": {
+      "enabled": false,
+      "movements": {}
+    },
+    "Latissimus Dorsi": {
+      "enabled": false,
+      "movements": {}
+    },
+    "Serratus Anterior": {
+      "enabled": true,
+      "movements": {
+        "Protraktion": "HomeGym"
+      }
+    },
+    "Biceps Brachii": {
+      "enabled": false,
+      "movements": {}
+    },
+    "Triceps Longum | Lateraler Kopf | Medialer Kopf": {
+      "enabled": false,
+      "movements": {}
+    },
+    "Finger Flexion": {
+      "enabled": false,
+      "movements": {}
+    },
+    "Finger Extension": {
+      "enabled": false,
+      "movements": {}
+    },
+    "Handgelenk Flexion": {
+      "enabled": false,
+      "movements": {}
+    },
+    "Handgelenk Strecker": {
+      "enabled": false,
+      "movements": {}
+    },
+    "Unterarm Supinatoren | Pronatoren": {
+      "enabled": false,
+      "movements": {}
+    },
+    "Rectus Abdominis": {
+      "enabled": false,
+      "movements": {}
+    },
+    "Transversus Abdominis": {
+      "enabled": false,
+      "movements": {}
+    },
+    "Obliquus": {
+      "enabled": false,
+      "movements": {}
+    },
+    "Erector Spinae": {
+      "enabled": false,
+      "movements": {}
+    },
+    "Iliopsoas": {
+      "enabled": false,
+      "movements": {}
+    },
+    "Gluteus Maximus": {
+      "enabled": false,
+      "movements": {}
+    },
+    "Gluteus Medius | Minimus": {
+      "enabled": false,
+      "movements": {}
+    },
+    "Gluteus medius (anteriore Fasern)": {
+      "enabled": false,
+      "movements": {}
+    },
+    "Adductor Longus | Magnus | Gracilis": {
+      "enabled": false,
+      "movements": {}
+    },
+    "Hüft-Außenrotatoren": {
+      "enabled": false,
+      "movements": {}
+    },
+    "Hamstrings": {
+      "enabled": false,
+      "movements": {}
+    },
+    "Quadrizeps": {
+      "enabled": false,
+      "movements": {}
+    },
+    "Gastrocnemius | Soleus": {
+      "enabled": false,
+      "movements": {}
+    },
+    "Tibialis Anterior": {
+      "enabled": false,
+      "movements": {}
+    },
+    "Tibialis Posterior": {
+      "enabled": false,
+      "movements": {}
+    },
+    "Flexor Digitorum Brevis": {
+      "enabled": false,
+      "movements": {}
+    },
+    "Extensor Digitorum Brevis": {
+      "enabled": false,
+      "movements": {}
+    }
+  }
+}
