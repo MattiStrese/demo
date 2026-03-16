@@ -2,7 +2,7 @@
 weight_store.py
 ---------------
 Loads and saves per-exercise weights as a JSON file per person,
-e.g. weights_matti.json, weights_cornelia.json, etc.
+stored in the storage/ directory, e.g. storage/weights_matti.json.
 
 Shape: { muscle_name: { movement: { "Maschine_kg": float, "HomeGym_kg": float, "Isometrisch_kg": float } } }
 """
@@ -17,13 +17,16 @@ _DEMO_DIR = pathlib.Path(__file__).resolve().parent
 if str(_DEMO_DIR) not in sys.path:
     sys.path.insert(0, str(_DEMO_DIR))
 
+_STORAGE_DIR = _DEMO_DIR / "storage"
+_STORAGE_DIR.mkdir(exist_ok=True)
+
 _WEIGHT_KEYS: tuple[str, ...] = ("Maschine_kg", "HomeGym_kg", "Isometrisch_kg")
 
 
 def _weights_file(person: str) -> pathlib.Path:
-    """Return the path to the weights file for *person*."""
+    """Return the path to the weights file for *person* inside storage/."""
     name = person.lower().replace(" ", "_")
-    return pathlib.Path(__file__).parent / f"weights_{name}.json"
+    return _STORAGE_DIR / f"weights_{name}.json"
 
 
 def get_default_weights(exercises: dict) -> dict:

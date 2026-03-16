@@ -3,7 +3,7 @@ person_store.py
 ---------------
 Manages per-person training configuration files.
 
-Config file: person_config_{slug}.json
+Config file: storage/person_config_{slug}.json
 Config JSON shape:
 {
   "person": "Name",
@@ -30,6 +30,9 @@ _DEMO_DIR = pathlib.Path(__file__).resolve().parent
 if str(_DEMO_DIR) not in sys.path:
     sys.path.insert(0, str(_DEMO_DIR))
 
+_STORAGE_DIR = _DEMO_DIR / "storage"
+_STORAGE_DIR.mkdir(exist_ok=True)
+
 from exercises_dict import PERSONS as _BASE_PERSONS, muscle_exercises as _BASE_EXERCISES
 
 _CONFIG_PREFIX = "person_config_"
@@ -44,7 +47,7 @@ def _slug(name: str) -> str:
 
 
 def _config_file(name: str) -> pathlib.Path:
-    return _DEMO_DIR / f"{_CONFIG_PREFIX}{_slug(name)}.json"
+    return _STORAGE_DIR / f"{_CONFIG_PREFIX}{_slug(name)}.json"
 
 
 # ---------------------------------------------------------------------------
@@ -58,7 +61,7 @@ def list_persons() -> list[str]:
     Preserves order; no duplicates.
     """
     file_persons: list[str] = []
-    for f in sorted(_DEMO_DIR.glob(f"{_CONFIG_PREFIX}*.json")):
+    for f in sorted(_STORAGE_DIR.glob(f"{_CONFIG_PREFIX}*.json")):
         try:
             data = json.loads(f.read_text(encoding="utf-8"))
             file_persons.append(data["person"])

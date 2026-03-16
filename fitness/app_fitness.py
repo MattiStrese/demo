@@ -202,7 +202,7 @@ def _render_theme_tab(theme_movements: set[str], tab_title: str, search_key: str
     st.subheader(tab_title)
     st.caption(
         "Passe die Gewichte für jede Übung an. "
-        "Änderungen werden **sofort gespeichert** (weights.json)."
+        "Änderungen werden **sofort gespeichert** (storage/weights.json)."
     )
 
     search = st.text_input(

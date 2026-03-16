@@ -1,0 +1,97 @@
+{
+  "sources": [
+    {
+      "name": "Dividenden-Portfolio",
+      "yearly": 1000.0,
+      "growth_pct": 5.0,
+      "color": "#4CAF50"
+    },
+    {
+      "name": "Mieteinnahmen",
+      "yearly": 6600.0,
+      "growth_pct": 3.0,
+      "color": "#2196F3"
+    },
+    {
+      "name": "Aktives Einkommen (Lohn)",
+      "yearly": 50000.0,
+      "growth_pct": 2.0,
+      "color": "#FF9800"
+    }
+  ],
+  "expenses": [
+    {
+      "name": "Miete",
+      "yearly": 9600.0,
+      "growth_pct": 2.0,
+      "color": "#F44336"
+    },
+    {
+      "name": "Versicherungen",
+      "yearly": 1800.0,
+      "growth_pct": 3.0,
+      "color": "#E91E63"
+    },
+    {
+      "name": "Lebensmittel",
+      "yearly": 3600.0,
+      "growth_pct": 3.5,
+      "color": "#9C27B0"
+    },
+    {
+      "name": "Shopping",
+      "yearly": 1200.0,
+      "growth_pct": 2.0,
+      "color": "#FF5722"
+    },
+    {
+      "name": "Amazon",
+      "yearly": 4000.0,
+      "growth_pct": 3.0,
+      "color": "#795548"
+    },
+    {
+      "name": "Strom",
+      "yearly": 900.0,
+      "growth_pct": 4.0,
+      "color": "#607D8B"
+    },
+    {
+      "name": "Wasser",
+      "yearly": 300.0,
+      "growth_pct": 2.5,
+      "color": "#D32F2F"
+    },
+    {
+      "name": "Müll",
+      "yearly": 180.0,
+      "growth_pct": 2.0,
+      "color": "#C2185B"
+    },
+    {
+      "name": "Risikorücklage",
+      "yearly": 2000.0,
+      "growth_pct": 0.0,
+      "color": "#7B1FA2"
+    },
+    {
+      "name": "Steuerberater",
+      "yearly": 1000.0,
+      "growth_pct": 2.0,
+      "color": "#BF360C"
+    },
+    {
+      "name": "Steuernachzahlung",
+      "yearly": 1000.0,
+      "growth_pct": 3.0,
+      "color": "#F44336"
+    },
+    {
+      "name": "KfZ Kosten",
+      "yearly": 2000.0,
+      "growth_pct": 3.0,
+      "color": "#E91E63"
+    }
+  ],
+  "years": 3
+}
