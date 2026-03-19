@@ -1,145 +1,36 @@
-_EMPTY_EXERCISE_VALUES = ("None", "none", "-", "")
-
-VARIANT_WEIGHT_KEYS: dict[str, str] = {
-    "Maschine": "Maschine_kg",
-    "HomeGym": "HomeGym_kg",
-    "Isometrisch": "Isometrisch_kg",
-}
-
-
-def _is_empty_exercise_value(val) -> bool:
-    return val is None or val in _EMPTY_EXERCISE_VALUES
-
-
-def _coerce_target_weight(val) -> float:
-    try:
-        return float(val or 0.0)
-    except (TypeError, ValueError):
-        return 0.0
-
-
-def exercise_entries(val, target_weight: float | None = None) -> list[dict[str, float | str]]:
-    """Return normalized exercise entries with name + target_weight."""
-    if _is_empty_exercise_value(val):
-        return []
-
-    items = val if isinstance(val, list) else [val]
-    fallback_weight = _coerce_target_weight(target_weight)
-    entries: list[dict[str, float | str]] = []
-
-    for item in items:
-        if _is_empty_exercise_value(item):
-            continue
-
-        if isinstance(item, dict):
-            exercise_name = item.get("name") or item.get("exercise") or item.get("Übung")
-            if _is_empty_exercise_value(exercise_name):
-                continue
-            item_weight = item.get("target_weight", fallback_weight)
-            entries.append(
-                {
-                    "name": str(exercise_name),
-                    "target_weight": _coerce_target_weight(item_weight),
-                }
-            )
-            continue
-
-        entries.append(
-            {
-                "name": str(item),
-                "target_weight": fallback_weight,
-            }
-        )
-
-    return entries
-
-
-def exercise_options(val) -> list[str]:
-    """Return a list of exercise name strings from a raw or normalized catalog value."""
-    return [str(entry["name"]) for entry in exercise_entries(val)]
-
-
-def first_exercise_entry(val) -> dict[str, float | str] | None:
-    """Return the first normalized exercise entry or None."""
-    entries = exercise_entries(val)
-    return entries[0] if entries else None
-
-
-def first_exercise_name(val) -> str | None:
-    """Return the first exercise name from a raw or normalized catalog value."""
-    entry = first_exercise_entry(val)
-    return str(entry["name"]) if entry else None
-
-
-def exercise_target_weight(val) -> float | None:
-    """Return the first exercise target weight from a raw or normalized catalog value."""
-    entry = first_exercise_entry(val)
-    if not entry:
-        return None
-    return _coerce_target_weight(entry.get("target_weight"))
-
-
-def format_target_weight(weight: float | int | None) -> str:
-    """Format a target weight for UI display."""
-    if weight is None:
-        return "Ziel: —"
-    return f"Ziel: {float(weight):.1f} kg"
-
-
-def format_exercise_label(
-    val,
-    *,
-    include_target_weight: bool = True,
-    fallback: str = "—",
-    max_name_length: int | None = None,
-) -> str:
-    """Return a UI-friendly exercise label, optionally including target weight."""
-    exercise_name = first_exercise_name(val)
-    if not exercise_name:
-        return fallback
-
-    if max_name_length is not None:
-        exercise_name = exercise_name[:max_name_length]
-
-    if not include_target_weight:
-        return exercise_name
-
-    return f"{exercise_name} · {format_target_weight(exercise_target_weight(val))}"
-
-
 muscle_exercises = {
     ###################################################################################################################
     ################################################# Nackenmuskeln ###################################################
     ###################################################################################################################
     'Sternocleidomastoideus | Splenius Capitis': {
         'Beugung': {
-            'Maschine': ['Vorbeugen auf Bank mit Gewicht'],
-            'HomeGym': ['Gewichtshelm Flexion'],
-            'Isometrisch': [],
+            'Maschine': 'Vorbeugen auf Bank mit Gewicht',
+            'HomeGym': 'Gewichtshelm Flexion',
+            'Isometrisch': 'None',
             'Maschine_kg': 10,
             'HomeGym_kg': 10,
             'Isometrisch_kg': 10,
         },
         'Streckung': {
-            'Maschine': ['Neck Extensions auf Bank mit Gewicht'],
-            'HomeGym': ['Gewichtshelm Extension'],
-            'Isometrisch': [],
+            'Maschine': 'Neck Extensions auf Bank mit Gewicht',
+            'HomeGym': 'Gewichtshelm Extension',
+            'Isometrisch': 'None',
             'Maschine_kg': 10,
             'HomeGym_kg': 10,
             'Isometrisch_kg': 10,
         },
         'Rotation': {
-            'Maschine': ['Kopfrotation mit Gewicht'],
-            'HomeGym': ['Kopfrotation mit Gewichtshelm'],
-            'Isometrisch': [],
+            'Maschine': 'Kopfrotation mit Gewicht',
+            'HomeGym': 'Kopfrotation mit Gewichtshelm',
+            'Isometrisch': 'None',
             'Maschine_kg': 10,
             'HomeGym_kg': 10,
             'Isometrisch_kg': 10,
         },
         'Lateralflexion': {
-            'Maschine': [],
-            'HomeGym': ['Seitliche Flexion mit Gewichtshelm'],
-            'Isometrisch': [],
+            'Maschine': None,
+            'HomeGym': 'Seitliche Flexion mit Gewichtshelm',
+            'Isometrisch': 'None',
             'Maschine_kg': 10,
             'HomeGym_kg': 10,
             'Isometrisch_kg': 10,
@@ -150,54 +41,54 @@ muscle_exercises = {
     ###################################################################################################################
     'Pectoralis Clavicularis | Sternalis': {
         'Beugung': {
-            'Maschine': ['Schrägbank-Brustpresse'],
-            'HomeGym': ['Schrägbank-Bankdruecken', 'Pec-Crusher', 'PushUps', 'Liegestütze mit Gewichtsweste'],
-            'Isometrisch': ['Liegestuetz halten'],
-            'Maschine_kg': 100,
-            'HomeGym_kg': 60,
+            'Maschine': 'Schrägbank-Brustpresse',
+            'HomeGym': 'Schrägbank-Brustpresse, Diamond Liegestütze mit Weste, Pec-Crusher',
+            'Isometrisch': 'Liegestuetz halten',
+            'Maschine_kg': 10,
+            'HomeGym_kg': 10,
             'Isometrisch_kg': 10,
         },
         'Adduktion': {
-            'Maschine': ['Kabelzug Crossover'],
-            'HomeGym': ['Flys mit Kurzhanteln'],
-            'Isometrisch': ['Max. Adduktion halten (Fly-Endposition)'],
+            'Maschine': 'Kabelzug Crossover',
+            'HomeGym': 'Flys mit Kurzhanteln',
+            'Isometrisch': 'Max. Adduktion halten (Fly-Endposition)',
             'Maschine_kg': 10,
             'HomeGym_kg': 10,
             'Isometrisch_kg': 10,
         },
     },
     # 'Pectoralis Sternalis': {
-    #     'Horizontale Adduktion': {'Maschine': ['Flachbank-Brustpresse'], 'HomeGym': ['Flachbank-Brustpresse, Diamond Liegestütze mit Weste, Pec-Crusher'], 'Isometrisch': [],},
-    #     'Adduktion':             {'Maschine': ['Pec-Deck-Maschine'],       'HomeGym': ['Kurzhantel-Fliegen'], 'Isometrisch': [],},
+    #     'Horizontale Adduktion': {'Maschine': 'Flachbank-Brustpresse', 'HomeGym': 'Flachbank-Brustpresse, Diamond Liegestütze mit Weste, Pec-Crusher', 'Isometrisch': 'None',},
+    #     'Adduktion':             {'Maschine': 'Pec-Deck-Maschine',       'HomeGym': 'Kurzhantel-Fliegen', 'Isometrisch': 'None',},
     # },
     ###################################################################################################################
     #################################################   Schulter    ###################################################
     ###################################################################################################################
-    'Rotatorenmanschette Innenrotation': {
+    'Rotatorenmanschette innen': {
         'Rotation': {
-            'Maschine': ['Kabelzug'],
-            'HomeGym': ['reverse Hydraulikpresse'],
-            'Isometrisch': ['Hydraulikpresse innen halten'],
-            'Maschine_kg': 7,
+            'Maschine': "none",
+            'HomeGym': 'reverse Hydraulikpresse',
+            'Isometrisch': 'Hydraulikpresse innen halten',
+            'Maschine_kg': 10,
             'HomeGym_kg': 10,
             'Isometrisch_kg': 10,
         },
     },
-    'Rotatorenmanschette Aussenrotation': {
+    'Rotatorenmanschette aussen': {
         'Rotation': {
-            'Maschine': ['Kabelzug'],
-            'HomeGym': ['Teraband aussen'],
-            'Isometrisch': ['Band außen halten'],
-            'Maschine_kg': 7,
+            'Maschine': "none",
+            'HomeGym': 'Teraband aussen',
+            'Isometrisch': 'Band außen halten',
+            'Maschine_kg': 10,
             'HomeGym_kg': 10,
             'Isometrisch_kg': 10,
         },
     },
     'Deltamuskel Vordere Faser': {
         'Beugung': {
-            'Maschine': ['Kabelzug Frontheben'],
-            'HomeGym': ['Frontheben mit Kurzhanteln'],
-            'Isometrisch': [],
+            'Maschine': 'Kabelzug Frontheben',
+            'HomeGym': 'Frontheben mit Kurzhanteln',
+            'Isometrisch': 'None',
             'Maschine_kg': 10,
             'HomeGym_kg': 10,
             'Isometrisch_kg': 10,
@@ -205,9 +96,9 @@ muscle_exercises = {
     },
     'Deltamuskel Mittlere Faser': {
         'Abduktion': {
-            'Maschine': ['Schulterpresse'],
-            'HomeGym': ['Wandschraeges Seitheben mit Kurzhanteln', 'Seitheben mit Kurzhanteln', 'Cable Lateral Raise'],
-            'Isometrisch': [],
+            'Maschine': 'Seitheben-Maschine',
+            'HomeGym': 'Wandschraeges Seitliches Heben mit Kurzhanteln',
+            'Isometrisch': 'None',
             'Maschine_kg': 10,
             'HomeGym_kg': 10,
             'Isometrisch_kg': 10,
@@ -215,40 +106,40 @@ muscle_exercises = {
     },
     'Deltamuskel Hintere Faser': {
         'Streckung': {
-            'Maschine': ['Reverse Pec Deck'],
-            'HomeGym': ['Reverse-Fly auf Bank mit Kurzhanteln'],
-            'Isometrisch': [],
-            'Maschine_kg': 50,
-            'HomeGym_kg': 20,
+            'Maschine': 'Reverse Pec Deck',
+            'HomeGym': 'Reverse-Fly auf Bank mit Kurzhanteln, Hydraulikpresse reverse',
+            'Isometrisch': 'None',
+            'Maschine_kg': 10,
+            'HomeGym_kg': 10,
             'Isometrisch_kg': 10,
         },
     },
     # Trapezius-Anteile
     'Trapezius Elevation': {
         'Elevation': {
-            'Maschine': ['Shrugs mit Langhantelhalterung'],
-            'HomeGym': ['Shrugs mit Kurzhanteln'],
-            'Isometrisch': [],
-            'Maschine_kg': 60,
-            'HomeGym_kg': 30,
+            'Maschine': 'Shrugs mit Langhantelhalterung',
+            'HomeGym': 'Shrugs mit Kurzhanteln',
+            'Isometrisch': 'None',
+            'Maschine_kg': 10,
+            'HomeGym_kg': 10,
             'Isometrisch_kg': 10,
         },
     },
     'Trapezius Retraktion': {
         'Streckung': {
-            'Maschine': ['T-Row'],
-            'HomeGym': ['Kurzhantel-Rudern (Kelso Shrug) auf Bank'],
-            'Isometrisch': ['Flachbank schraeg Kurzhantel-Rudern halten'],
-            'Maschine_kg': 60,
-            'HomeGym_kg': 44,
+            'Maschine': 'Rudergerät sitzend',
+            'HomeGym': 'Flachbank schraeg Kurzhantel-Rudern (Kelso Shrug!)',
+            'Isometrisch': 'Flachbank schraeg Kurzhantel-Rudern halten',
+            'Maschine_kg': 10,
+            'HomeGym_kg': 10,
             'Isometrisch_kg': 10,
         },
     },
     'Trapezius Depression': {
         'Depression': {
-            'Maschine': ['Überkopf-Kabelzug nach unten ziehen'],
-            'HomeGym': ['Überkopf-Kabelzug nach unten ziehen'],
-            'Isometrisch': ['Deadhang'],
+            'Maschine': 'Überkopf-Kabelzug nach unten ziehen',
+            'HomeGym': 'Überkopf-Kabelzug nach unten ziehen',
+            'Isometrisch': 'Deadhang',
             'Maschine_kg': 10,
             'HomeGym_kg': 10,
             'Isometrisch_kg': 10,
@@ -257,17 +148,17 @@ muscle_exercises = {
     # Latissimus
     'Latissimus Dorsi': {
         'Adduktion': {
-            'Maschine': ['Latissimuszug (Latzug)'],
-            'HomeGym': ['Klimmzüge mit Gewichtsweste', 'Rudern mit Langhantel', 'Einarm-Kurzhantelrudern'],
-            'Isometrisch': [],
+            'Maschine': 'Latissimuszug (Latzug)',
+            'HomeGym': 'Klimmzüge mit Gewichtsweste',
+            'Isometrisch': 'None',
             'Maschine_kg': 10,
             'HomeGym_kg': 10,
             'Isometrisch_kg': 10,
         },
         'Streckung': {
-            'Maschine': ['schraeger Latissimuszug (Latzug)'],
-            'HomeGym': ['schraege Klimmzüge mit Hohlkreuz'],
-            'Isometrisch': [],
+            'Maschine': 'schraeger Latissimuszug (Latzug)',
+            'HomeGym': 'schraege Klimmzüge mit Hohlkreuz',
+            'Isometrisch': 'None',
             'Maschine_kg': 10,
             'HomeGym_kg': 10,
             'Isometrisch_kg': 10,
@@ -275,9 +166,9 @@ muscle_exercises = {
     },
     'Serratus Anterior': {
         'Protraktion': {
-            'Maschine': [],
-            'HomeGym': ['Scapula Push-Ups', 'Wall Slides', 'Serratus Punch mit Band'],
-            'Isometrisch': ['Plank mit aktiver Protraktion'],
+            'Maschine': None,
+            'HomeGym': 'Scapula Push-Ups | Wall Slides | Serratus Punch mit Band',
+            'Isometrisch': 'Plank mit aktiver Protraktion',
             'Maschine_kg': 10,
             'HomeGym_kg': 10,
             'Isometrisch_kg': 10,
@@ -288,38 +179,33 @@ muscle_exercises = {
     ###################################################################################################################
     'Biceps Brachii': {
         'Beugung': {
-            'Maschine': ['Scott-Curl-Maschine'],
-            'HomeGym': ['Scott-Curls Schraegbank', 'Kurzhantel Curls stehend', 'Hammer Curls'],
-            'Isometrisch': [],
+            'Maschine': 'Scott-Curl-Maschine',
+            'HomeGym': 'Scott-Curl Schraegbank | Supinations-Curls',
+            'Isometrisch': 'None',
             'Maschine_kg': 10,
             'HomeGym_kg': 10,
             'Isometrisch_kg': 10,
         },
         'Supination': {
-            'Maschine': ['Kabel Supinationscurl'],
-            'HomeGym': ['Rotator Supination'],
-            'Isometrisch': [],
+            'Maschine': 'Kabel Supinationscurl',
+            'HomeGym': 'Rotator Supination',
+            'Isometrisch': 'None',
             'Maschine_kg': 10,
             'HomeGym_kg': 10,
             'Isometrisch_kg': 10,
         },
     },
     'Triceps Longum | Lateraler Kopf | Medialer Kopf': {
-        'Streckung': {'Maschine': ['Overhead Extension Kabelturm'],
-                      'HomeGym': ['Overhead Extension Seilzug'],
-                      'Isometrisch': [],
-                      'Maschine_kg': 0,
-                      'HomeGym_kg': 0,
-                      'Isometrisch_kg': 0},
+        'Streckung': {'Maschine': 'Überkopf-Trizepsmaschine', 'HomeGym': 'Dips | Weiter Liegestütz | Cable Pullover', 'Maschine_kg': 0, 'HomeGym_kg': 0, 'Isometrisch_kg': 0},
     },
     ###################################################################################################################
     #################################################   Unterarme    ###################################################
     ###################################################################################################################
     'Finger Flexion': {
         'Beugung': {
-            'Maschine': [],
-            'HomeGym': ['Fingerflexion mit Gummiball oder Grifftrainer'],
-            'Isometrisch': ['Deadhang'],
+            'Maschine': "-",
+            'HomeGym': 'Fingerflexion mit Gummiball oder Grifftrainer',
+            'Isometrisch': 'Deadhang',
             'Maschine_kg': 10,
             'HomeGym_kg': 10,
             'Isometrisch_kg': 10,
@@ -327,9 +213,9 @@ muscle_exercises = {
     },
     'Finger Extension': {
         'Streckung': {
-            'Maschine': [],
-            'HomeGym': ['Fingerstreckung mit Handband'],
-            'Isometrisch': [],
+            'Maschine': "-",
+            'HomeGym': 'Fingerstreckung mit Handband',
+            'Isometrisch': 'None',
             'Maschine_kg': 10,
             'HomeGym_kg': 10,
             'Isometrisch_kg': 10,
@@ -337,9 +223,9 @@ muscle_exercises = {
     },
     'Handgelenk Flexion': {
         'Beugung': {
-            'Maschine': ['Unterarm-Trainer'],
-            'HomeGym': ['Unterarm-Trainer'],
-            'Isometrisch': [],
+            'Maschine': "Unterarm-Trainer",
+            'HomeGym': 'Unterarm-Trainer',
+            'Isometrisch': 'None',
             'Maschine_kg': 10,
             'HomeGym_kg': 10,
             'Isometrisch_kg': 10,
@@ -347,9 +233,9 @@ muscle_exercises = {
     },
     'Handgelenk Strecker': {
         'Streckung': {
-            'Maschine': ['Unterarm-Trainer'],
-            'HomeGym': ['Unterarm-Trainer'],
-            'Isometrisch': [],
+            'Maschine': "Unterarm-Trainer",
+            'HomeGym': 'Unterarm-Trainer',
+            'Isometrisch': 'None',
             'Maschine_kg': 10,
             'HomeGym_kg': 10,
             'Isometrisch_kg': 10,
@@ -357,17 +243,17 @@ muscle_exercises = {
     },
     'Unterarm Supinatoren | Pronatoren': {
         'Supination': {
-            'Maschine': [],
-            'HomeGym': ['Rotator Supination'],
-            'Isometrisch': [],
+            'Maschine': None,
+            'HomeGym': 'Rotator Supination',
+            'Isometrisch': 'None',
             'Maschine_kg': 10,
             'HomeGym_kg': 10,
             'Isometrisch_kg': 10,
         },
         'Pronation': {
-            'Maschine': [],
-            'HomeGym': ['Rotator Pronation'],
-            'Isometrisch': [],
+            'Maschine': None,
+            'HomeGym': 'Rotator Pronation',
+            'Isometrisch': 'None',
             'Maschine_kg': 10,
             'HomeGym_kg': 10,
             'Isometrisch_kg': 10,
@@ -378,9 +264,9 @@ muscle_exercises = {
     ###################################################################################################################
     'Rectus Abdominis': {
         'Beugung': {
-            'Maschine': ['Crunch-Maschine'],
-            'HomeGym': ['Gestreckte Crunches mit Unterlage und Flutterkicks'],
-            'Isometrisch': ['Hollow Body Hold / Ab-Wheel Hold'],
+            'Maschine': 'Crunch-Maschine',
+            'HomeGym': 'Gestreckte Crunches mit Unterlage und Flutterkicks',
+            'Isometrisch': 'Hollow Body Hold / Ab-Wheel Hold',
             'Maschine_kg': 10,
             'HomeGym_kg': 10,
             'Isometrisch_kg': 10,
@@ -388,9 +274,9 @@ muscle_exercises = {
     },
     'Transversus Abdominis': {
         'Anti-Extension': {
-            'Maschine': ['Stabilitätsball-Roll-Out'],
-            'HomeGym': ['Plank mit Gewichtsweste'],
-            'Isometrisch': [],
+            'Maschine': 'Stabilitätsball-Roll-Out',
+            'HomeGym': 'Plank mit Gewichtsweste',
+            'Isometrisch': 'None',
             'Maschine_kg': 10,
             'HomeGym_kg': 10,
             'Isometrisch_kg': 10,
@@ -398,17 +284,17 @@ muscle_exercises = {
     },
     'Obliquus': {
         'Anti-Rotation': {
-            'Maschine': ['Klimmzugstange seitlich'],
-            'HomeGym': ['Russian Twists'],
-            'Isometrisch': [],
+            'Maschine': 'Klimmzugstange seitlich',
+            'HomeGym': 'Russian Twists, Pallof Press, Side Plank mit Gewichtsweste',
+            'Isometrisch': 'None',
             'Maschine_kg': 10,
             'HomeGym_kg': 10,
             'Isometrisch_kg': 10,
         },
         'Beugung': {
-            'Maschine': [],
-            'HomeGym': ['Schraege Crunches'],
-            'Isometrisch': [],
+            'Maschine': None,
+            'HomeGym': 'Schraege Crunches ',
+            'Isometrisch': 'None',
             'Maschine_kg': 10,
             'HomeGym_kg': 10,
             'Isometrisch_kg': 10,
@@ -416,9 +302,9 @@ muscle_exercises = {
     },
     'Erector Spinae': {
         'Streckung': {
-            'Maschine': ['Hyperextensions'],
-            'HomeGym': ['5 Minuten Workout!'],
-            'Isometrisch': ['5 Minuten Workout!'],
+            'Maschine': 'Hyperextensions-Gerät',
+            'HomeGym': '5 Minuten Workout!',
+            'Isometrisch': '5 Minuten Workout!',
             'Maschine_kg': 10,
             'HomeGym_kg': 10,
             'Isometrisch_kg': 10,
@@ -429,9 +315,9 @@ muscle_exercises = {
     ###################################################################################################################
     'Iliopsoas': {
         'Beugung': {
-            'Maschine': ['Hueftbeugermaschine'],
-            'HomeGym': ['Hanging Leg Raises'],
-            'Isometrisch': ['Dragon Flag auf Bank oder haengend'],
+            'Maschine': 'Hueftbeugermaschine',
+            'HomeGym': 'Hanging Leg Raises',
+            'Isometrisch': 'Dragon Flag auf Bank oder haengend',
             'Maschine_kg': 10,
             'HomeGym_kg': 10,
             'Isometrisch_kg': 10,
@@ -439,9 +325,9 @@ muscle_exercises = {
     },
     'Gluteus Maximus': {
         'Streckung': {
-            'Maschine': ['Glute-Press-Maschine'],
-            'HomeGym': ['Squats mit Kettlebell und Gewichtsweste', 'Hip Thrusts mit Langhantel', 'Sumo Deadlifts'],
-            'Isometrisch': [],
+            'Maschine': 'Glute-Press-Maschine',
+            'HomeGym': 'Squats mit Kettlebell und Gewichtsweste',
+            'Isometrisch': 'None',
             'Maschine_kg': 10,
             'HomeGym_kg': 10,
             'Isometrisch_kg': 10,
@@ -449,9 +335,9 @@ muscle_exercises = {
     },
     'Gluteus Medius | Minimus': {
         'Abduktion': {
-            'Maschine': ['Hüftabduktionsmaschine'],
-            'HomeGym': ['Teraband Abduktionen im Stehen', 'Clamshells'],
-            'Isometrisch': [],
+            'Maschine': 'Hüftabduktionsmaschine',
+            'HomeGym': 'Teraband Abduktionen im Stehen | Clamshells',
+            'Isometrisch': 'None',
             'Maschine_kg': 10,
             'HomeGym_kg': 10,
             'Isometrisch_kg': 10,
@@ -459,9 +345,9 @@ muscle_exercises = {
     },
     'Adductor Longus | Magnus | Gracilis': {
         'Adduktion': {
-            'Maschine': ['Hüftadduktionsmaschine'],
-            'HomeGym': ['Hydraulikpresse zwischen Beine'],
-            'Isometrisch': [],
+            'Maschine': 'Hüftadduktionsmaschine',
+            'HomeGym': 'Hydraulikpresse zwischen Beine',
+            'Isometrisch': 'None',
             'Maschine_kg': 10,
             'HomeGym_kg': 10,
             'Isometrisch_kg': 10,
@@ -469,9 +355,9 @@ muscle_exercises = {
     },
     'Gluteus medius (anteriore Fasern)': {
         'Abduktion': {
-            'Maschine': ['Hüftabduktionsmaschine'],
-            'HomeGym': ['Teraband Abduktionen im Stehen', 'Clamshells'],
-            'Isometrisch': [],
+            'Maschine': 'Hüftabduktionsmaschine',
+            'HomeGym': 'Teraband Abduktionen im Stehen | Clamshells',
+            'Isometrisch': 'None',
             'Maschine_kg': 10,
             'HomeGym_kg': 10,
             'Isometrisch_kg': 10,
@@ -479,9 +365,9 @@ muscle_exercises = {
     },
     'Hüft-Außenrotatoren': {
         'Rotation': {
-            'Maschine': [],
-            'HomeGym': ['Clamshells mit Fokus auf Außenrotation', '90/90 Rotations', 'Band External Rotations im Sitzen'],
-            'Isometrisch': ['90/90 Hold'],
+            'Maschine': None,
+            'HomeGym': 'Clamshells mit Fokus auf Außenrotation | 90/90 Rotations | Band External Rotations im Sitzen',
+            'Isometrisch': '90/90 Hold',
             'Maschine_kg': 10,
             'HomeGym_kg': 10,
             'Isometrisch_kg': 10,
@@ -492,21 +378,21 @@ muscle_exercises = {
     ###################################################################################################################
     'Hamstrings': {
         'Beugung': {
-            'Maschine': ['Beinbeugemaschine'],
-            'HomeGym': ['Deadlifts', 'Romanian Deadlifts', 'Nordic Curls'],
-            'Isometrisch': [],
-            'Maschine_kg': 70,
-            'HomeGym_kg': 20,
+            'Maschine': 'Beinbeugemaschine',
+            'HomeGym': 'Rum. Kreuzheben Kettlebell | Teraband Horsekicks | Pistol Squats',
+            'Isometrisch': 'None',
+            'Maschine_kg': 10,
+            'HomeGym_kg': 10,
             'Isometrisch_kg': 10,
         },
     },
     'Quadrizeps': {
         'Streckung': {
-            'Maschine': ['Multipresse Langhantel Squat'],
-            'HomeGym': ['Weighted Sumo Squats', 'Bulgarians Split Squats', 'Einbein-Kniebeugen'],
-            'Isometrisch': [],
-            'Maschine_kg': 40,
-            'HomeGym_kg': 40,
+            'Maschine': 'Horizontale Beinpresse',
+            'HomeGym': 'Bulgarian Split Squats |Goblet Squats | Jump Squats | Lunges',
+            'Isometrisch': 'None',
+            'Maschine_kg': 10,
+            'HomeGym_kg': 10,
             'Isometrisch_kg': 10,
         },
     },
@@ -515,9 +401,9 @@ muscle_exercises = {
     ###################################################################################################################
     'Gastrocnemius | Soleus': {
         'Beugung': {
-            'Maschine': ['Stehende Wadenmaschine'],
-            'HomeGym': ['Weighted Wadenheben', 'Seilspringen'],
-            'Isometrisch': [],
+            'Maschine': 'Stehende Wadenmaschine',
+            'HomeGym': 'Weighted Wadenheben | Seilspringen',
+            'Isometrisch': 'None',
             'Maschine_kg': 10,
             'HomeGym_kg': 10,
             'Isometrisch_kg': 10,
@@ -525,9 +411,9 @@ muscle_exercises = {
     },
     'Tibialis Anterior': {
         'Streckung': {
-            'Maschine': ['Tibialis-Maschine'],
-            'HomeGym': ['Beidseitige Teraband Dorsalextension an Couch'],
-            'Isometrisch': [],
+            'Maschine': 'Tibialis-Maschine',
+            'HomeGym': 'Beidseitige Teraband Dorsalextension an Couch',
+            'Isometrisch': 'None',
             'Maschine_kg': 10,
             'HomeGym_kg': 10,
             'Isometrisch_kg': 10,
@@ -535,9 +421,9 @@ muscle_exercises = {
     },
     'Tibialis Posterior': {
         'Inversion': {
-            'Maschine': [],
-            'HomeGym': ['Theraband Inversion im Sitz', 'Einbeinstand mit aktiver Gewölbespanning'],
-            'Isometrisch': ['Short Foot Hold (mediales Fußgewölbe aktiv anheben)'],
+            'Maschine': None,
+            'HomeGym': 'Theraband Inversion im Sitz | Einbeinstand mit aktiver Gewölbespanning',
+            'Isometrisch': 'Short Foot Hold (mediales Fußgewölbe aktiv anheben)',
             'Maschine_kg': 10,
             'HomeGym_kg': 10,
             'Isometrisch_kg': 10,
@@ -546,46 +432,31 @@ muscle_exercises = {
     # Fußmuskulatur
     'Flexor Digitorum Brevis': {
         'Beugung': {
-            'Maschine': [],
-            'HomeGym': ['Handtuch-Zusammenziehen'],
-            'Isometrisch': [],
+            'Maschine': None,
+            'HomeGym': 'Handtuch-Zusammenziehen',
+            'Isometrisch': 'None',
             'Maschine_kg': 10,
             'HomeGym_kg': 10,
             'Isometrisch_kg': 10,
         },
     },
-    # 'Extensor Digitorum Brevis': {
-    #     'Streckung': {
-    #         'Maschine': [],
-    #         'HomeGym': ['Murmeln mit Zehen greifen'],
-    #         'Isometrisch': [],
-    #         'Maschine_kg': 10,
-    #         'HomeGym_kg': 10,
-    #         'Isometrisch_kg': 10,
-    #     },
-    # },
+    'Extensor Digitorum Brevis': {
+        'Streckung': {
+            'Maschine': None,
+            'HomeGym': 'Murmeln mit Zehen greifen',
+            'Isometrisch': 'None',
+            'Maschine_kg': 10,
+            'HomeGym_kg': 10,
+            'Isometrisch_kg': 10,
+        },
+    },
     # 'Abductor Hallucis': {
-    #     'Abduktion': {'Maschine': [], 'HomeGym': ['Zehen Spreizen'], 'Isometrisch': [],},
+    #     'Abduktion': {'Maschine': None, 'HomeGym': 'Zehen Spreizen', 'Isometrisch': 'None',},
     # },
     # 'Adductor Hallucis': {
-    #     'Adduktion': {'Maschine': [], 'HomeGym': ['Zehen-Zusammenziehen mit Band'], 'Isometrisch': [],},
+    #     'Adduktion': {'Maschine': None, 'HomeGym': 'Zehen-Zusammenziehen mit Band', 'Isometrisch': 'None',},
     # },
 }
-
-
-def _add_target_weights(catalog: dict) -> dict:
-    """Attach target_weight to each exercise option while preserving variant weight defaults."""
-    for movements in catalog.values():
-        for entry in movements.values():
-            for variant_key, weight_key in VARIANT_WEIGHT_KEYS.items():
-                entry[variant_key] = exercise_entries(
-                    entry.get(variant_key),
-                    target_weight=entry.get(weight_key),
-                )
-    return catalog
-
-
-muscle_exercises = _add_target_weights(muscle_exercises)
 
 passive_stretches = {
     'Sternocleidomastoideus': 'Seitliche Nacken-Dehnung mit Handunterstützung. '

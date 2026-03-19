@@ -3,7 +3,7 @@ person_store.py
 ---------------
 Manages per-person training configuration files.
 
-Config file: person_config_{slug}.json
+Config file: storage/person_config_{slug}.json
 Config JSON shape:
 {
   "person": "Name",
@@ -30,13 +30,10 @@ _DEMO_DIR = pathlib.Path(__file__).resolve().parent
 if str(_DEMO_DIR) not in sys.path:
     sys.path.insert(0, str(_DEMO_DIR))
 
-from exercises_dict import (
-    PERSONS as _BASE_PERSONS,
-    VARIANT_WEIGHT_KEYS,
-    exercise_entries,
-    muscle_exercises as _BASE_EXERCISES,
-)
-from target_weight_store import load_target_weighted_exercises
+_STORAGE_DIR = _DEMO_DIR / "storage"
+_STORAGE_DIR.mkdir(exist_ok=True)
+
+from exercises_dict import PERSONS as _BASE_PERSONS, muscle_exercises as _BASE_EXERCISES
 
 _CONFIG_PREFIX = "person_config_"
 
@@ -50,7 +47,7 @@ def _slug(name: str) -> str:
 
 
 def _config_file(name: str) -> pathlib.Path:
-    return _DEMO_DIR / f"{_CONFIG_PREFIX}{_slug(name)}.json"
+    return _STORAGE_DIR / f"{_CONFIG_PREFIX}{_slug(name)}.json"
 
 
 # ---------------------------------------------------------------------------
@@ -64,7 +61,7 @@ def list_persons() -> list[str]:
     Preserves order; no duplicates.
     """
     file_persons: list[str] = []
-    for f in sorted(_DEMO_DIR.glob(f"{_CONFIG_PREFIX}*.json")):
+    for f in sorted(_STORAGE_DIR.glob(f"{_CONFIG_PREFIX}*.json")):
         try:
             data = json.loads(f.read_text(encoding="utf-8"))
             file_persons.append(data["person"])
@@ -105,17 +102,11 @@ def build_person_exercises(name: str, base_exercises: dict | None = None) -> dic
     global muscle_exercises catalog).
 
     - Disabled muscles are excluded entirely.
-    - If a muscle has explicit movement selections, only those movements are kept.
     - When a preferred variant is set for a movement, the other two variants
       are nulled out so schedule_logic picks the correct one automatically.
-    - Supports old string format ("HomeGym") and new dict format
-      ({"variant": "HomeGym", "exercise": "PushUps"}) for movement config.
-    - Returns one selected exercise entry per variant as a dict with name and
-      target_weight, so downstream code can keep exercise-level metadata.
     """
     if base_exercises is None:
         base_exercises = _BASE_EXERCISES
-    base_exercises = load_target_weighted_exercises(name, base_exercises)
 
     config = load_person_config(name)
     muscle_cfg: dict = config.get("muscles", {})
@@ -124,51 +115,18 @@ def build_person_exercises(name: str, base_exercises: dict | None = None) -> dic
     for muscle, movements in base_exercises.items():
         cfg = muscle_cfg.get(muscle, {})
         if not cfg.get("enabled", False):
-            continue
+            continue  # muscle disabled for this person
 
-        configured_movements: dict = cfg.get("movements", {})
-        selected_movement_names = set(configured_movements)
         result[muscle] = {}
         for movement, entry in movements.items():
-            if selected_movement_names and movement not in selected_movement_names:
-                continue
-
-            mov_cfg = configured_movements.get(movement)
-
-            # Normalize: support old string format and new dict format
-            if isinstance(mov_cfg, str):
-                preferred_variant = mov_cfg
-                preferred_exercise = None
-            elif isinstance(mov_cfg, dict):
-                preferred_variant = mov_cfg.get("variant")
-                preferred_exercise = mov_cfg.get("exercise")
-            else:
-                preferred_variant = None
-                preferred_exercise = None
-
-            new_entry = {}
-            for k, v in entry.items():
-                if k in ("Maschine", "HomeGym", "Isometrisch"):
-                    options = exercise_entries(
-                        v,
-                        target_weight=entry.get(VARIANT_WEIGHT_KEYS[k]),
-                    )
-                    if preferred_variant and k != preferred_variant:
-                        new_entry[k] = None
-                    elif preferred_exercise and k == preferred_variant:
-                        new_entry[k] = copy.deepcopy(
-                            next(
-                                (option for option in options if option["name"] == preferred_exercise),
-                                options[0] if options else None,
-                            )
-                        )
-                    else:
-                        new_entry[k] = copy.deepcopy(options[0]) if options else None
-                else:
-                    new_entry[k] = v
+            preferred: str | None = cfg.get("movements", {}).get(movement)
+            new_entry = dict(entry)  # shallow copy is fine – we only replace top-level keys
+            if preferred in ("Maschine", "HomeGym", "Isometrisch"):
+                # Null out non-preferred variants so _pick_exercise_variant
+                # in schedule_logic always chooses the right one.
+                for variant in ("Maschine", "HomeGym", "Isometrisch"):
+                    if variant != preferred:
+                        new_entry[variant] = None
             result[muscle][movement] = new_entry
-
-        if not result[muscle]:
-            del result[muscle]
 
     return result

@@ -23,14 +23,13 @@ if str(_DEMO_DIR) not in sys.path:
 import streamlit as st
 
 from constants import BODY_PARTS, VARIANTS
-from exercises_dict import exercise_entries, format_exercise_label, muscle_exercises
+from exercises_dict import muscle_exercises
 from person_store import (
     build_person_exercises,
     list_persons,
     load_person_config,
     save_person_config,
 )
-from target_weight_store import load_target_weighted_exercises
 
 # ---------------------------------------------------------------------------
 # Page config
@@ -102,20 +101,19 @@ st.subheader(f"Konfiguration für: **{person_name}**")
 # Load existing config (or default)
 config = load_person_config(person_name)
 muscle_cfg: dict = config.setdefault("muscles", {})
-person_catalog = load_target_weighted_exercises(person_name, muscle_exercises)
 
 # ---------------------------------------------------------------------------
 # Helper – exercise option labels for a movement entry
 # ---------------------------------------------------------------------------
+_NONE_VALS = (None, "None", "none", "-", "")
+
 def _variant_options(entry: dict) -> list[str]:
-    """Return list of selectable variant option strings for a movement entry."""
+    """Return list of selectable option strings for a movement entry."""
     opts = ["⚙️ Automatisch"]
     for key, icon, label in VARIANTS:
         val = entry.get(key)
-        options = exercise_entries(val)
-        if options:
-            preview = format_exercise_label(options[0], max_name_length=50)
-            opts.append(f"{icon} {label}: {preview}")
+        if val not in _NONE_VALS:
+            opts.append(f"{icon} {label}: {str(val)[:60]}")
     return opts
 
 
@@ -128,11 +126,7 @@ def _option_to_variant(option: str) -> str | None:
 
 
 def _current_option(entry: dict, preferred: str | None, opts: list[str]) -> str:
-    """Find the currently selected option string for this movement.
-    
-    *preferred* is always a variant key string (e.g. 'HomeGym'), already
-    extracted from the config before calling this function.
-    """
+    """Find the currently selected option string for this movement."""
     if preferred:
         for key, icon, label in VARIANTS:
             if key == preferred:
@@ -150,14 +144,14 @@ changes: dict = {}  # muscle → {enabled, movements}
 
 for body_part_label, muscles_in_part in BODY_PARTS:
     # Only show body parts that have at least one muscle in the catalog
-    relevant_muscles = [m for m in muscles_in_part if m in person_catalog]
+    relevant_muscles = [m for m in muscles_in_part if m in muscle_exercises]
     if not relevant_muscles:
         continue
 
     st.markdown(f'<div class="bodypart-header">{body_part_label}</div>', unsafe_allow_html=True)
 
     for muscle_name in relevant_muscles:
-        movements = person_catalog[muscle_name]
+        movements = muscle_exercises[muscle_name]
         saved_mcfg = muscle_cfg.get(muscle_name, {})
         is_enabled = saved_mcfg.get("enabled", False)
 
@@ -180,67 +174,21 @@ for body_part_label, muscles_in_part in BODY_PARTS:
             for movement, entry in movements.items():
                 opts = _variant_options(entry)
                 if len(opts) == 1:
+                    # Only "Automatisch" available – nothing to choose
                     st.caption(f"**{movement}** — keine Varianten verfügbar")
                     continue
 
-                saved_mov_cfg = saved_movs.get(movement)
-                # Normalize saved config (support old str and new dict format)
-                if isinstance(saved_mov_cfg, str):
-                    saved_variant = saved_mov_cfg
-                    saved_exercise = None
-                elif isinstance(saved_mov_cfg, dict):
-                    saved_variant = saved_mov_cfg.get("variant")
-                    saved_exercise = saved_mov_cfg.get("exercise")
-                else:
-                    saved_variant = None
-                    saved_exercise = None
-
-                current_opt = _current_option(entry, saved_variant, opts)
+                current = _current_option(entry, saved_movs.get(movement), opts)
 
                 sel = st.selectbox(
-                    f"**{movement}** — Variante",
+                    f"**{movement}**",
                     opts,
-                    index=opts.index(current_opt),
+                    index=opts.index(current),
                     key=f"mov_{muscle_name}_{movement}",
                 )
-                variant_key = _option_to_variant(sel)
-
-                if variant_key:
-                    ex_entries = exercise_entries(entry.get(variant_key, []))
-                    ex_options = [str(ex["name"]) for ex in ex_entries]
-                    if len(ex_options) > 1:
-                        current_ex = saved_exercise if saved_exercise in ex_options else ex_options[0]
-                        chosen_ex = st.selectbox(
-                            f"↳ Übung ({variant_key})",
-                            ex_options,
-                            index=ex_options.index(current_ex),
-                            key=f"ex_{muscle_name}_{movement}_{variant_key}",
-                            format_func=lambda exercise_name, options=ex_entries: next(
-                                (
-                                    format_exercise_label(option, max_name_length=70)
-                                    for option in options
-                                    if option["name"] == exercise_name
-                                ),
-                                exercise_name,
-                            ),
-                        )
-                    else:
-                        chosen_ex = ex_options[0] if ex_options else None
-
-                    if chosen_ex:
-                        selected_entry = next(
-                            (option for option in ex_entries if option["name"] == chosen_ex),
-                            None,
-                        )
-                        if selected_entry:
-                            st.caption(
-                                f"🎯 {format_exercise_label(selected_entry, max_name_length=90)}"
-                            )
-
-                    changes[muscle_name]["movements"][movement] = {
-                        "variant": variant_key,
-                        "exercise": chosen_ex,
-                    }
+                variant = _option_to_variant(sel)
+                if variant:
+                    changes[muscle_name]["movements"][movement] = variant
 
 # ---------------------------------------------------------------------------
 # Save button

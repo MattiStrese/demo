@@ -16,7 +16,6 @@ import random
 
 import matplotlib
 import matplotlib.pyplot as plt
-from exercises_dict import exercise_target_weight, first_exercise_name
 
 matplotlib.use("Agg")
 
@@ -52,10 +51,10 @@ _SECONDARY_THEMES: list[str] = [
 _WEEKLY_THEMES: list[str | list[str]] = [
     "Beugung",
     "Streckung",
-    "Rotation",
+    _SECONDARY_THEMES,
     "Beugung",
     "Streckung",
-    "Rotation",
+    _SECONDARY_THEMES,
     "Beugung",
 ]
 
@@ -109,21 +108,17 @@ def _pick_exercise_variant(
 ) -> tuple[str | None, str | None]:
     entry = muscle_exercises[muscle_name][movement]
 
-    def _resolve(val):
-        """Resolve a value to a single exercise name string."""
-        return first_exercise_name(val)
-
     if prefer_isometric:
-        iso = _resolve(entry.get("Isometrisch"))
-        if iso:
+        iso = entry.get("Isometrisch")
+        if iso and iso not in (None, "None", "none"):
             return iso, "Isometrisch"
 
-    home = _resolve(entry.get("HomeGym"))
-    if home:
+    home = entry.get("HomeGym")
+    if home and home not in (None, "None", "none"):
         return home, "Dynamisch"
 
-    machine = _resolve(entry.get("Maschine"))
-    if machine:
+    machine = entry.get("Maschine")
+    if machine and machine not in (None, "None", "none"):
         return machine, "Maschine"
 
     return None, None
@@ -179,7 +174,6 @@ def build_weekly_plan(
             if not exercise_name or not execution_type:
                 continue
 
-            movement_entry = muscle_exercises[muscle_name][movement]
             weight_key = _WEIGHT_KEY_MAP.get(execution_type, "HomeGym_kg")
             current_weight = float(
                 weights.get(muscle_name, {}).get(movement, {}).get(weight_key, 0.0)
@@ -189,7 +183,6 @@ def build_weekly_plan(
                 "Bewegung": movement,
                 "Typ": execution_type,
                 "Übung": exercise_name,
-                "Zielgewicht_kg": exercise_target_weight(movement_entry.get(weight_key[:-3])),
                 "Gewicht_key": weight_key,
                 "Gewicht_kg": current_weight,
                 "Gewicht_1W": compute_hypertrophy_weight(current_weight, 1),

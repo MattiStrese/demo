@@ -34,12 +34,7 @@ from constants import (  # shared constants
     EXTENSION_MOVEMENTS,
     ROTATION_MOVEMENTS,
 )
-from exercises_dict import (
-    exercise_options,
-    format_exercise_label,
-    format_target_weight,
-    muscle_exercises,
-)  # master catalog
+from exercises_dict import muscle_exercises  # master catalog
 from person_store import build_person_exercises, list_persons  # dynamic person support
 from schedule_logic import (  # local module
     DAY_TO_THEME,
@@ -146,41 +141,31 @@ def _make_save_cb(muscle: str, movement: str, wtype: str, widget_key: str):
 # ---------------------------------------------------------------------------
 # Helper – render 3-column weight slider block for one exercise movement
 # ---------------------------------------------------------------------------
-def _exercise_str_for_search(val) -> str:
-    """Return a searchable string from an exercise value."""
-    return " ".join(exercise_options(val))
-
-
 def _fmt_exercise(val) -> str:
-    """Return display string for an exercise name plus target weight."""
-    return format_exercise_label(val, max_name_length=55)
+    """Return display string for an exercise name, handling None/empty."""
+    if val in (None, "None", "none", "-", ""):
+        return "—"
+    return str(val)[:55]
 
 
 def _render_weight_sliders(muscle_name: str, movement: str, entry: dict) -> None:
-    """Render only the exercise variants that are actually available for this movement."""
-    variant_rows = [
-        ("🏋️", "Maschine", "Maschine_kg", entry.get("Maschine")),
-        ("🏠", "HomeGym", "HomeGym_kg", entry.get("HomeGym")),
-        ("🧘", "Isometrisch", "Isometrisch_kg", entry.get("Isometrisch")),
-    ]
-    available_variants = [
-        (icon, label, wtype, exercise_value)
-        for icon, label, wtype, exercise_value in variant_rows
-        if exercise_value
-    ]
+    """Renders the 3-column Maschine / HomeGym / Isometrisch slider block."""
+    machine_ex = _fmt_exercise(entry.get("Maschine"))
+    home_ex = _fmt_exercise(entry.get("HomeGym"))
+    iso_ex = _fmt_exercise(entry.get("Isometrisch"))
 
-    if not available_variants:
-        st.caption("Keine Varianten verfügbar.")
-        return
+    col_m, col_h, col_i = st.columns(3, gap="medium")
 
-    cols = st.columns(len(available_variants), gap="medium")
-
-    for col, (icon, label, wtype, exercise_value) in zip(cols, available_variants):
+    for col, icon, label, wtype, exercise_text in [
+        (col_m, "🏋️", "Maschine", "Maschine_kg", machine_ex),
+        (col_h, "🏠", "HomeGym", "HomeGym_kg", home_ex),
+        (col_i, "🧘", "Isometrisch", "Isometrisch_kg", iso_ex),
+    ]:
         with col:
             st.markdown(
                 f'<p class="wtype-header">{icon} {label}</p>', unsafe_allow_html=True
             )
-            st.caption(_fmt_exercise(exercise_value))
+            st.caption(exercise_text)
             skey = _skey(muscle_name, movement, wtype)
             sl_key = f"sl_{skey}"
             ni_key = f"ni_{skey}"
@@ -217,7 +202,7 @@ def _render_theme_tab(theme_movements: set[str], tab_title: str, search_key: str
     st.subheader(tab_title)
     st.caption(
         "Passe die Gewichte für jede Übung an. "
-        "Änderungen werden **sofort gespeichert** (weights.json)."
+        "Änderungen werden **sofort gespeichert** (storage/weights.json)."
     )
 
     search = st.text_input(
@@ -241,8 +226,8 @@ def _render_theme_tab(theme_movements: set[str], tab_title: str, search_key: str
                 s = search.lower()
                 match = s in muscle_name.lower() or any(
                     s in mv.lower()
-                    or s in _exercise_str_for_search(exercises[muscle_name][mv].get("Maschine", "")).lower()
-                    or s in _exercise_str_for_search(exercises[muscle_name][mv].get("HomeGym", "")).lower()
+                    or s in str(exercises[muscle_name][mv].get("Maschine", "")).lower()
+                    or s in str(exercises[muscle_name][mv].get("HomeGym", "")).lower()
                     for mv in movs
                 )
                 if not match:
@@ -351,19 +336,10 @@ with tab_plan:
                 else:
                     weight_html = "<small><i>Gewicht nicht gesetzt</i></small>"
 
-                target_weight = info.get("Zielgewicht_kg")
-                target_html = (
-                    f'<br><small>{format_target_weight(target_weight)}</small>'
-                    if target_weight is not None
-                    else ""
-                )
-
                 st.markdown(
                     f'<div class="day-card">'
                     f"<b>{muscle[:26]}</b><br>"
                     f"<small>{info['Übung'][:38]}</small><br>"
-                    f"{target_html}"
-                    f"<br>"
                     f"{badge}&nbsp;{weight_html}"
                     f"</div>",
                     unsafe_allow_html=True,
@@ -420,7 +396,6 @@ with tab_progression:
                 {
                     "Muskel": muscle,
                     "Übung": info["Übung"][:55],
-                    "Ziel": format_target_weight(info.get("Zielgewicht_kg")),
                     "Typ": info["Typ"],
                     f"Jetzt ({today.strftime('%d.%m')})": f"{c:.1f} kg" if c > 0 else "—",
                     f"+1 Woche ({date_1w.strftime('%d.%m')})": f"{w:.1f} kg" if c > 0 else "—",

@@ -1,0 +1,448 @@
+{
+  "Sternocleidomastoideus | Splenius Capitis": {
+    "Beugung": {
+      "Maschine": {
+        "Vorbeugen auf Bank mit Gewicht": 10.0
+      },
+      "HomeGym": {
+        "Gewichtshelm Flexion": 10.0
+      }
+    },
+    "Streckung": {
+      "Maschine": {
+        "Neck Extensions auf Bank mit Gewicht": 10.0
+      },
+      "HomeGym": {
+        "Gewichtshelm Extension": 10.0
+      }
+    },
+    "Rotation": {
+      "Maschine": {
+        "Kopfrotation mit Gewicht": 10.0
+      },
+      "HomeGym": {
+        "Kopfrotation mit Gewichtshelm": 10.0
+      }
+    },
+    "Lateralflexion": {
+      "HomeGym": {
+        "Seitliche Flexion mit Gewichtshelm": 10.0
+      }
+    }
+  },
+  "Pectoralis Clavicularis | Sternalis": {
+    "Beugung": {
+      "Maschine": {
+        "Schrägbank-Brustpresse": 160.0
+      },
+      "HomeGym": {
+        "Schrägbank-Bankdruecken": 60.0,
+        "Pec-Crusher": 60.0,
+        "PushUps": 60.0,
+        "Liegestütze mit Gewichtsweste": 60.0
+      },
+      "Isometrisch": {
+        "Liegestuetz halten": 10.0
+      }
+    },
+    "Adduktion": {
+      "Maschine": {
+        "Kabelzug Crossover": 20.0
+      },
+      "HomeGym": {
+        "Flys mit Kurzhanteln": 20.0
+      },
+      "Isometrisch": {
+        "Max. Adduktion halten (Fly-Endposition)": 20.0
+      }
+    }
+  },
+  "Rotatorenmanschette Innenrotation": {
+    "Rotation": {
+      "Maschine": {
+        "Kabelzug": 7.0
+      },
+      "HomeGym": {
+        "reverse Hydraulikpresse": 10.0
+      },
+      "Isometrisch": {
+        "Hydraulikpresse innen halten": 10.0
+      }
+    }
+  },
+  "Rotatorenmanschette Aussenrotation": {
+    "Rotation": {
+      "Maschine": {
+        "Kabelzug": 7.0
+      },
+      "HomeGym": {
+        "Teraband aussen": 10.0
+      },
+      "Isometrisch": {
+        "Band außen halten": 10.0
+      }
+    }
+  },
+  "Deltamuskel Vordere Faser": {
+    "Beugung": {
+      "Maschine": {
+        "Kabelzug Frontheben": 10.0
+      },
+      "HomeGym": {
+        "Frontheben mit Kurzhanteln": 10.0
+      }
+    }
+  },
+  "Deltamuskel Mittlere Faser": {
+    "Abduktion": {
+      "Maschine": {
+        "Schulterpresse": 10.0
+      },
+      "HomeGym": {
+        "Wandschraeges Seitheben mit Kurzhanteln": 20.0,
+        "Seitheben mit Kurzhanteln": 20.0,
+        "Cable Lateral Raise": 10.0
+      }
+    }
+  },
+  "Deltamuskel Hintere Faser": {
+    "Streckung": {
+      "Maschine": {
+        "Reverse Pec Deck": 50.0
+      },
+      "HomeGym": {
+        "Reverse-Fly auf Bank mit Kurzhanteln": 20.0
+      }
+    }
+  },
+  "Trapezius Elevation": {
+    "Elevation": {
+      "Maschine": {
+        "Shrugs mit Langhantelhalterung": 60.0
+      },
+      "HomeGym": {
+        "Shrugs mit Kurzhanteln": 30.0
+      }
+    }
+  },
+  "Trapezius Retraktion": {
+    "Streckung": {
+      "Maschine": {
+        "T-Row": 100.0
+      },
+      "HomeGym": {
+        "Kurzhantel-Rudern (Kelso Shrug) auf Bank": 44.0
+      },
+      "Isometrisch": {
+        "Flachbank schraeg Kurzhantel-Rudern halten": 10.0
+      }
+    }
+  },
+  "Trapezius Depression": {
+    "Depression": {
+      "Maschine": {
+        "Überkopf-Kabelzug nach unten ziehen": 10.0
+      },
+      "HomeGym": {
+        "Überkopf-Kabelzug nach unten ziehen": 10.0
+      },
+      "Isometrisch": {
+        "Deadhang": 10.0
+      }
+    }
+  },
+  "Latissimus Dorsi": {
+    "Adduktion": {
+      "Maschine": {
+        "Latissimuszug (Latzug)": 10.0
+      },
+      "HomeGym": {
+        "Klimmzüge mit Gewichtsweste": 20.0,
+        "Rudern mit Langhantel": 10.0,
+        "Einarm-Kurzhantelrudern": 10.0
+      }
+    },
+    "Streckung": {
+      "Maschine": {
+        "schraeger Latissimuszug (Latzug)": 10.0
+      },
+      "HomeGym": {
+        "schraege Klimmzüge mit Hohlkreuz": 10.0
+      }
+    }
+  },
+  "Serratus Anterior": {
+    "Protraktion": {
+      "HomeGym": {
+        "Scapula Push-Ups": 10.0,
+        "Wall Slides": 10.0,
+        "Serratus Punch mit Band": 10.0
+      },
+      "Isometrisch": {
+        "Plank mit aktiver Protraktion": 10.0
+      }
+    }
+  },
+  "Biceps Brachii": {
+    "Beugung": {
+      "Maschine": {
+        "Scott-Curl-Maschine": 60.0
+      },
+      "HomeGym": {
+        "Scott-Curls Schraegbank": 20.0,
+        "Kurzhantel Curls stehend": 10.0,
+        "Hammer Curls": 10.0
+      }
+    },
+    "Supination": {
+      "Maschine": {
+        "Kabel Supinationscurl": 10.0
+      },
+      "HomeGym": {
+        "Rotator Supination": 10.0
+      }
+    }
+  },
+  "Triceps Longum | Lateraler Kopf | Medialer Kopf": {
+    "Streckung": {
+      "Maschine": {
+        "Overhead Extension Kabelturm": 30.0
+      },
+      "HomeGym": {
+        "Overhead Extension Seilzug": 0.0
+      }
+    }
+  },
+  "Finger Flexion": {
+    "Beugung": {
+      "HomeGym": {
+        "Fingerflexion mit Gummiball oder Grifftrainer": 10.0
+      },
+      "Isometrisch": {
+        "Deadhang": 10.0
+      }
+    }
+  },
+  "Finger Extension": {
+    "Streckung": {
+      "HomeGym": {
+        "Fingerstreckung mit Handband": 10.0
+      }
+    }
+  },
+  "Handgelenk Flexion": {
+    "Beugung": {
+      "Maschine": {
+        "Unterarm-Trainer": 10.0
+      },
+      "HomeGym": {
+        "Unterarm-Trainer": 10.0
+      }
+    }
+  },
+  "Handgelenk Strecker": {
+    "Streckung": {
+      "Maschine": {
+        "Unterarm-Trainer": 10.0
+      },
+      "HomeGym": {
+        "Unterarm-Trainer": 10.0
+      }
+    }
+  },
+  "Unterarm Supinatoren | Pronatoren": {
+    "Supination": {
+      "HomeGym": {
+        "Rotator Supination": 10.0
+      }
+    },
+    "Pronation": {
+      "HomeGym": {
+        "Rotator Pronation": 10.0
+      }
+    }
+  },
+  "Rectus Abdominis": {
+    "Beugung": {
+      "Maschine": {
+        "Crunch-Maschine": 10.0
+      },
+      "HomeGym": {
+        "Gestreckte Crunches mit Unterlage und Flutterkicks": 10.0
+      },
+      "Isometrisch": {
+        "Hollow Body Hold / Ab-Wheel Hold": 10.0
+      }
+    }
+  },
+  "Transversus Abdominis": {
+    "Anti-Extension": {
+      "Maschine": {
+        "Stabilitätsball-Roll-Out": 10.0
+      },
+      "HomeGym": {
+        "Plank mit Gewichtsweste": 10.0
+      }
+    }
+  },
+  "Obliquus": {
+    "Anti-Rotation": {
+      "Maschine": {
+        "Klimmzugstange seitlich": 10.0
+      },
+      "HomeGym": {
+        "Russian Twists": 10.0
+      }
+    },
+    "Beugung": {
+      "HomeGym": {
+        "Schraege Crunches": 10.0
+      }
+    }
+  },
+  "Erector Spinae": {
+    "Streckung": {
+      "Maschine": {
+        "Hyperextensions": 10.0
+      },
+      "HomeGym": {
+        "5 Minuten Workout!": 10.0
+      },
+      "Isometrisch": {
+        "5 Minuten Workout!": 10.0
+      }
+    }
+  },
+  "Iliopsoas": {
+    "Beugung": {
+      "Maschine": {
+        "Hueftbeugermaschine": 10.0
+      },
+      "HomeGym": {
+        "Hanging Leg Raises": 10.0
+      },
+      "Isometrisch": {
+        "Dragon Flag auf Bank oder haengend": 10.0
+      }
+    }
+  },
+  "Gluteus Maximus": {
+    "Streckung": {
+      "Maschine": {
+        "Glute-Press-Maschine": 10.0
+      },
+      "HomeGym": {
+        "Squats mit Kettlebell und Gewichtsweste": 10.0,
+        "Hip Thrusts mit Langhantel": 10.0,
+        "Sumo Deadlifts": 10.0
+      }
+    }
+  },
+  "Gluteus Medius | Minimus": {
+    "Abduktion": {
+      "Maschine": {
+        "Hüftabduktionsmaschine": 10.0
+      },
+      "HomeGym": {
+        "Teraband Abduktionen im Stehen": 10.0,
+        "Clamshells": 10.0
+      }
+    }
+  },
+  "Adductor Longus | Magnus | Gracilis": {
+    "Adduktion": {
+      "Maschine": {
+        "Hüftadduktionsmaschine": 10.0
+      },
+      "HomeGym": {
+        "Hydraulikpresse zwischen Beine": 10.0
+      }
+    }
+  },
+  "Gluteus medius (anteriore Fasern)": {
+    "Abduktion": {
+      "Maschine": {
+        "Hüftabduktionsmaschine": 10.0
+      },
+      "HomeGym": {
+        "Teraband Abduktionen im Stehen": 10.0,
+        "Clamshells": 10.0
+      }
+    }
+  },
+  "Hüft-Außenrotatoren": {
+    "Rotation": {
+      "HomeGym": {
+        "Clamshells mit Fokus auf Außenrotation": 10.0,
+        "90/90 Rotations": 10.0,
+        "Band External Rotations im Sitzen": 10.0
+      },
+      "Isometrisch": {
+        "90/90 Hold": 10.0
+      }
+    }
+  },
+  "Hamstrings": {
+    "Beugung": {
+      "Maschine": {
+        "Beinbeugemaschine": 70.0
+      },
+      "HomeGym": {
+        "Deadlifts": 60.0,
+        "Romanian Deadlifts": 20.0,
+        "Nordic Curls": 20.0
+      }
+    }
+  },
+  "Quadrizeps": {
+    "Streckung": {
+      "Maschine": {
+        "Multipresse Langhantel Squat": 100.0
+      },
+      "HomeGym": {
+        "Weighted Sumo Squats": 40.0,
+        "Bulgarians Split Squats": 40.0,
+        "Einbein-Kniebeugen": 40.0
+      }
+    }
+  },
+  "Gastrocnemius | Soleus": {
+    "Beugung": {
+      "Maschine": {
+        "Stehende Wadenmaschine": 10.0
+      },
+      "HomeGym": {
+        "Weighted Wadenheben": 10.0,
+        "Seilspringen": 10.0
+      }
+    }
+  },
+  "Tibialis Anterior": {
+    "Streckung": {
+      "Maschine": {
+        "Tibialis-Maschine": 10.0
+      },
+      "HomeGym": {
+        "Beidseitige Teraband Dorsalextension an Couch": 10.0
+      }
+    }
+  },
+  "Tibialis Posterior": {
+    "Inversion": {
+      "HomeGym": {
+        "Theraband Inversion im Sitz": 10.0,
+        "Einbeinstand mit aktiver Gewölbespanning": 10.0
+      },
+      "Isometrisch": {
+        "Short Foot Hold (mediales Fußgewölbe aktiv anheben)": 10.0
+      }
+    }
+  },
+  "Flexor Digitorum Brevis": {
+    "Beugung": {
+      "HomeGym": {
+        "Handtuch-Zusammenziehen": 10.0
+      }
+    }
+  }
+}

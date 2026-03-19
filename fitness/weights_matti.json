@@ -1,0 +1,18 @@
+{
+  "Deltamuskel Mittlere Faser": {
+    "Abduktion": {
+      "Maschine_kg": 9.5,
+      "HomeGym_kg": 10.0
+    }
+  },
+  "Latissimus Dorsi": {
+    "Adduktion": {
+      "HomeGym_kg": 0.5
+    }
+  },
+  "Biceps Brachii": {
+    "Supination": {
+      "Maschine_kg": 0.0
+    }
+  }
+}
